@@ -20,10 +20,10 @@ import java.util.Map;
 @Component
 @RabbitListener(queues = "TestDirectQueue")
 public class DirectReceiver implements ChannelAwareMessageListener {
-    @RabbitHandler
-    public void process(Map testMessage) {
-        System.out.println("DirectReceiver消费者收到消息  : " + testMessage.toString());
-    }
+//    @RabbitHandler
+//    public void process(Map testMessage) {
+//        System.out.println("DirectReceiver消费者收到消息  : " + testMessage.toString());
+//    }
 
     @Override
     public void onMessage(Message message, Channel channel) throws Exception {
@@ -37,7 +37,8 @@ public class DirectReceiver implements ChannelAwareMessageListener {
             String messageData = msgMap.get("messageData");
             String createTime = msgMap.get("createTime");
             System.out.println("messageId:" + messageId + "  messageData:" + messageData + "  createTime:" + createTime);
-            channel.basicAck(deliveryTag, true);
+//            channel.basicAck(deliveryTag, true);//用户肯定确认
+            channel.basicNack(deliveryTag,true,true);//用于否定确认
 //			channel.basicReject(deliveryTag, true);//为true会重新放回队列
         } catch (Exception e) {
             channel.basicReject(deliveryTag, false);
@@ -47,6 +48,7 @@ public class DirectReceiver implements ChannelAwareMessageListener {
 
     //{key=value,key=value,key=value} 格式转换成map
     private Map<String, String> mapStringToMap(String str) {
+        System.out.println("str:"+str);
         str = str.substring(1, str.length() - 1);
         String[] strs = str.split(",");
         Map<String, String> map = new HashMap<String, String>();
